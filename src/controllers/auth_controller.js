@@ -26,9 +26,10 @@ export const signup = async (req, res) => {
     ]);
     console.log(userAlreadyExists);
     if (Array.isArray(userAlreadyExists) && userAlreadyExists.length != 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists, try another one",
+      });
     }
     if (Array.isArray(userNameAlreadyExists) && userNameAlreadyExists != 0) {
       return res.status(400).json({
@@ -77,6 +78,17 @@ export const signup = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+export const sendVerificationCode = async (req, res) => {
+  email = req.body;
+  try {
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      throw new Error("Invalid Email");
+    }
+    await sendVerificationEmail();
+  } catch (error) {
+    res.status(400).json({ success: true, message: error.message });
+  }
+};
 export const verifyEmail = async (req, res) => {
   const { code } = req.body;
   console.log("this is the code ", code);
@@ -90,17 +102,21 @@ export const verifyEmail = async (req, res) => {
         message: `Invalid or expired Verificcation code,Please Try Again : ${error.message}`,
       });
     }
-    user.is_verified = true;
-    user.verificationToken = undefined;
-    user.verification_token_expiry = undefined;
+    console.log("this is the user id", user.user_id);
+    const updatedUser = await userModel.updateUserVerified(
+      true,
+      null,
+      null,
+      user.user_id,
+    );
     await sendWelcomeEmail(user.email, user.name);
     res.status(200).json({
       success: true,
       message: `User Verifed successfully !`,
       user: {
-        name: user.name,
-        email: user.email,
-        verified: user.is_verified,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        is_verified: updatedUser.is_verified,
       },
     });
   } catch (error) {
@@ -110,5 +126,6 @@ export const verifyEmail = async (req, res) => {
     });
   }
 };
+
 export const login = async (req, res) => {};
 export const logout = async (req, res) => {};
