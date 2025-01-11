@@ -18,13 +18,14 @@ export const userModel = {
   async getUserByEmail(userEmail) {
     const { data, error } = await supabase
       .from("users")
-      .select("*")
+      .select(`user_id ,email , name, is_verified`)
       .eq("email", userEmail);
     if (error && error.code !== "PGRST116") {
       // Allow no row found error to pass as null
       throw new Error(`Error fetching user by email: ${error.message}`);
     }
     if (error) throw error;
+    console.log("this is the user ", data);
     return data;
   },
   async getUserByName(user_name) {
@@ -75,8 +76,9 @@ export const userModel = {
         verification_token_expiry: verificationTokenExpiry,
       })
       .eq("user_id", userID)
-      .select();
-    console.log(userID);
+      .select(
+        `user_id, email,name,role,is_verified,verification_token,verification_token_expiry`,
+      );
     if (!data) {
       throw new Error(`No user Found `);
     }

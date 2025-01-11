@@ -79,14 +79,40 @@ export const signup = async (req, res) => {
   }
 };
 export const sendVerificationCode = async (req, res) => {
-  email = req.body;
+  const { email } = req.body;
+  console.log(email);
   try {
-    if (!email || !email.includes("@") || !email.includes(".")) {
+    if (!email) {
+      throw new Error("Please provide an Email");
+    }
+    if (!email.includes("@") || !email.includes(".")) {
       throw new Error("Invalid Email");
     }
-    await sendVerificationEmail();
+    const [user] = await userModel.getUserByEmail(email);
+    console.log("is user verified? : ", user.is_verified);
+    if (user.is_verified === true) {
+      return res.status(400).json({
+        success: false,
+        message: `User already verified`,
+      });
+    }
+    const { token: verificationToken, expiresAt } = generateVerificationToken();
+    const [updatedUser] = await userModel.updateUserVerified(
+      false,
+      verificationToken,
+      expiresAt,
+      user.user_id,
+    );
+
+    await sendVerificationEmail(updatedUser.email, verificationToken);
+    res
+      .status(200)
+      .json({ success: true, message: `Verification code sent successfuly` });
   } catch (error) {
-    res.status(400).json({ success: true, message: error.message });
+    res.status(400).json({
+      success: false,
+      message: `Something wen wrong while sending the verification code ${error.message}`,
+    });
   }
 };
 export const verifyEmail = async (req, res) => {
@@ -99,7 +125,7 @@ export const verifyEmail = async (req, res) => {
       console.log("user doesnt exist");
       res.status(404).json({
         success: false,
-        message: `Invalid or expired Verificcation code,Please Try Again : ${error.message}`,
+        message: `Invalid or expired Verificcation code,Please Try Again `,
       });
     }
     console.log("this is the user id", user.user_id);
