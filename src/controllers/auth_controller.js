@@ -1,8 +1,17 @@
-import { userModel } from "../models/userModel.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import { generateVerificationToken } from "../utils/VerificationToken.js";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-import { sendVerificationEmail, sendWelcomeEmail } from "../mailtrap/emails.js";
+import {
+  sendVerificationEmail,
+  sendWelcomeEmail,
+  sendForgetPasswordEmail,
+} from "../mailtrap/emails.js";
+import { userModel } from "../models/userModel.js";
 export const signup = async (req, res) => {
   const { email, password, name, role } = req.body;
   console.log(email, password, name, role);
@@ -195,3 +204,45 @@ export const logout = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [user] = await userModel.getUserByEmail(email);
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User Not Found !",
+      });
+    }
+    if (!user.is_verified) {
+      return res.status(400).json({
+        success: false,
+        message: "Cant reset password Unverified Email",
+      });
+    }
+    //generate reset token :P
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpire = new Date();
+    resetTokenExpire.setHours(resetTokenExpire.getHours() + 1);
+    const [updatedUser] = await userModel.updateUserResetPassword(
+      resetToken,
+      resetTokenExpire,
+      user.user_id,
+    );
+    //sending reset email
+    sendForgetPasswordEmail(
+      updatedUser.email,
+      `http://${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`,
+    );
+    res.status(200).json({
+      success: true,
+      message: "password reset link sent to your email!",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+export const resetPassword = async (req, res) => {};

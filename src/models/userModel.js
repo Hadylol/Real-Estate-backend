@@ -99,4 +99,21 @@ export const userModel = {
     console.log(data);
     return data;
   },
+  async updateUserResetPassword(
+    resetPasswordToken,
+    resetPasswordExpire,
+    userID,
+  ) {
+    const { data, error } = await supabase
+      .from("users")
+      .update({
+        reset_Password_token: resetPasswordToken,
+        reset_password_token_expiry: resetPasswordExpire,
+      })
+      .eq("user_id", userID)
+      .select("*");
+    if (error)
+      throw new Error(`Failed to Updated user Reset Password ${error.message}`);
+    return data;
+  },
 };
