@@ -89,6 +89,9 @@ export const sendVerificationCode = async (req, res) => {
       throw new Error("Invalid Email");
     }
     const [user] = await userModel.getUserByEmail(email);
+    if (!user) {
+      res.status(404).json({ success: false, message: `User not Found` });
+    }
     console.log("is user verified? : ", user.is_verified);
     if (user.is_verified === true) {
       return res.status(400).json({
@@ -129,19 +132,20 @@ export const verifyEmail = async (req, res) => {
       });
     }
     console.log("this is the user id", user.user_id);
-    const updatedUser = await userModel.updateUserVerified(
+    const [updatedUser] = await userModel.updateUserVerified(
       true,
       null,
       null,
       user.user_id,
     );
-    await sendWelcomeEmail(user.email, user.name);
+    await sendWelcomeEmail(updatedUser.email, updatedUser.name);
     res.status(200).json({
       success: true,
       message: `User Verifed successfully !`,
       user: {
         name: updatedUser.name,
         email: updatedUser.email,
+        role: updatedUser.role,
         is_verified: updatedUser.is_verified,
       },
     });
@@ -153,5 +157,41 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {};
-export const logout = async (req, res) => {};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const [user] = await userModel.getUserLogin(email);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "invalid credentials",
+      });
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+    generateTokenAndSetCookie(res, user.user_id);
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: {
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        is_verified: user.is_verified,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+export const logout = async (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ success: true, message: "Logged out successfully" });
+};

@@ -15,25 +15,39 @@ export const userModel = {
     if (error) throw new Error(`Failed to Fetch User by ID : ${error} `);
     return data;
   },
+  async getUserLogin(userEmail) {
+    const { data, error } = await supabase
+      .from("users")
+      .select(`user_id,email,name,is_verified , role,password`)
+      .eq("email", userEmail);
+    if (error && error.code != "PGRST116") {
+      throw new Error(`Error fetching user by email: ${error.message}`);
+    }
+    if (error)
+      throw new Error(`Failed to fetch login  cedentials: ${error.message}`);
+    return data;
+  },
   async getUserByEmail(userEmail) {
     const { data, error } = await supabase
       .from("users")
-      .select(`user_id ,email , name, is_verified`)
+      .select(`user_id ,email , name, is_verified,role`)
       .eq("email", userEmail);
     if (error && error.code !== "PGRST116") {
       // Allow no row found error to pass as null
       throw new Error(`Error fetching user by email: ${error.message}`);
     }
-    if (error) throw error;
+
+    if (error) throw new Error(`Failed to fetch The user By Email`);
     console.log("this is the user ", data);
     return data;
   },
   async getUserByName(user_name) {
     const { data, error } = await supabase
       .from("users")
-      .select("*")
+      .select("name")
       .eq("name", user_name);
-    if (error) throw new Error(`Failed to Fetch the Full Name :${error}`);
+    if (error)
+      throw new Error(`Failed to Fetch the Full Name :${error.message}`);
     return data;
   },
   async createUser(user) {
@@ -41,14 +55,14 @@ export const userModel = {
       .from("users")
       .insert(user)
       .select("*");
-    if (error) throw error;
+    if (error) throw new Error(`Failed to Create User : ${error.message}`);
     return data;
   },
   async getUserByVerificationCode(verificationCode) {
     const timeStamp = new Date().toISOString();
     const { data, error } = await supabase
       .from("users")
-      .select("*")
+      .select(`user_id `)
       .eq("verification_token", verificationCode)
       .gt("verification_token_expiry", timeStamp)
       .single();
@@ -76,9 +90,7 @@ export const userModel = {
         verification_token_expiry: verificationTokenExpiry,
       })
       .eq("user_id", userID)
-      .select(
-        `user_id, email,name,role,is_verified,verification_token,verification_token_expiry`,
-      );
+      .select(`user_id, email,name,role,is_verified`);
     if (!data) {
       throw new Error(`No user Found `);
     }
