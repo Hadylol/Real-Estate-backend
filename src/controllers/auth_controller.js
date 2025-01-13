@@ -10,8 +10,11 @@ import {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendForgetPasswordEmail,
+  sendPasswordResetSuccess,
 } from "../mailtrap/emails.js";
 import { userModel } from "../models/userModel.js";
+import { fail } from "assert";
+
 export const signup = async (req, res) => {
   const { email, password, name, role } = req.body;
   console.log(email, password, name, role);
@@ -224,7 +227,7 @@ export const forgetPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpire = new Date();
     resetTokenExpire.setHours(resetTokenExpire.getHours() + 1);
-    const [updatedUser] = await userModel.updateUserResetPassword(
+    const [updatedUser] = await userModel.updateUserForgetPassword(
       resetToken,
       resetTokenExpire,
       user.user_id,
@@ -245,4 +248,41 @@ export const forgetPassword = async (req, res) => {
     });
   }
 };
-export const resetPassword = async (req, res) => {};
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+    console.log(`password : ${password}, Cpassword : ${confirmPassword}`);
+    if (password != confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password dont match,try agian...",
+      });
+    }
+
+    const user = await userModel.getUserByPasswordToken(token);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid or expierd Token, Please try again",
+      });
+    }
+    const hashPassword = await bcrypt.hash(password, 12);
+
+    const [updatedUser] = await userModel.updateUserPassword(
+      hashPassword,
+      user.user_id,
+    );
+    await sendPasswordResetSuccess(updatedUser.email);
+    res.status(200).json({
+      success: true,
+      message: "Password Changed successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

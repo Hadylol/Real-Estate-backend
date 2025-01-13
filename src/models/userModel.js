@@ -99,7 +99,7 @@ export const userModel = {
     console.log(data);
     return data;
   },
-  async updateUserResetPassword(
+  async updateUserForgetPassword(
     resetPasswordToken,
     resetPasswordExpire,
     userID,
@@ -114,6 +114,33 @@ export const userModel = {
       .select("*");
     if (error)
       throw new Error(`Failed to Updated user Reset Password ${error.message}`);
+    return data;
+  },
+  async getUserByPasswordToken(resetPasswordToken) {
+    const timeStamp = new Date().toISOString();
+    const { data, error } = await supabase
+      .from("users")
+      .select("user_id")
+      .eq("reset_Password_token", resetPasswordToken)
+      .gt("reset_password_token_expiry", timeStamp)
+      .single();
+    if (error) throw new Error(`Failed to get User by Token `);
+    console.log(data);
+    return data;
+  },
+  async updateUserPassword(hashPassword, userID) {
+    const { data, error } = await supabase
+      .from("users")
+      .update({
+        password: hashPassword,
+        reset_Password_token: null,
+        reset_password_token_expiry: null,
+      })
+      .eq("user_id", userID)
+      .select(`user_id,email,name,role,is_verified`);
+    if (error)
+      throw new Error(`Failed to updated User password..${error.message}`);
+    console.log(data);
     return data;
   },
 };
