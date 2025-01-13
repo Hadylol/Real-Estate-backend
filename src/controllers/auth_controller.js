@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import dotenv from "dotenv";
-
+import zxcvbn from "zxcvbn";
 dotenv.config();
 
 import { generateVerificationToken } from "../utils/VerificationToken.js";
@@ -28,6 +28,13 @@ export const signup = async (req, res) => {
     if (name.length < 5) {
       throw new Error("Full Name must be atleast 5 characters long");
     }
+    const passwordStrength = zxcvbn(password);
+    if (passwordStrength.score < 3) {
+      res.status(400).json({
+        success: false,
+        message: "Please User a stronger Password!",
+      });
+    }
     if (password.length < 8) {
       //improved later to make the password use diffrent case chara,symbols,numbers...
       throw new Error("Password must be at least 8 characters long");
@@ -49,7 +56,8 @@ export const signup = async (req, res) => {
         message: "Username already Used, try another one",
       });
     }
-    const hashPassword = await bcrypt.hash(password, 12);
+    const saltRounds = parseInt(process.env.BCRY_SALT);
+    const hashPassword = await bcrypt.hash(password, saltRounds);
     const { token: verificationToken, expiresAt } = generateVerificationToken();
 
     const [user] = await userModel.createUser({
@@ -250,25 +258,25 @@ export const forgetPassword = async (req, res) => {
 };
 export const resetPassword = async (req, res) => {
   try {
-    const { token } = req.params;
     const { password, confirmPassword } = req.body;
-    console.log(`password : ${password}, Cpassword : ${confirmPassword}`);
     if (password != confirmPassword) {
       return res.status(400).json({
         success: false,
         message: "Password dont match,try agian...",
       });
     }
-
-    const user = await userModel.getUserByPasswordToken(token);
-    console.log(user);
-    if (!user) {
-      return res.status(404).json({
+    const passwordStrength = zxcvbn(password);
+    if (passwordStrength.score < 3) {
+      return res.status(400).json({
         success: false,
-        message: "Invalid or expierd Token, Please try again",
+        message: "Password to Weak, try another",
       });
     }
-    const hashPassword = await bcrypt.hash(password, 12);
+    const user = req.user;
+    console.log(user);
+
+    const saltRounds = parseInt(process.env.BCRY_SALT);
+    const hashPassword = await bcrypt.hash(password, saltRounds);
 
     const [updatedUser] = await userModel.updateUserPassword(
       hashPassword,
