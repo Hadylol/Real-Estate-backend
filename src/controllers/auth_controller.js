@@ -1,21 +1,21 @@
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import dotenv from "dotenv";
-import zxcvbn from "zxcvbn";
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const dotenv = require("dotenv");
+const zxcvbn = require("zxcvbn");
 dotenv.config();
-
-import { generateVerificationToken } from "../utils/VerificationToken.js";
-import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
-import {
+const { generateVerificationToken } = require("../utils/VerificationToken.js");
+const {
+  generateTokenAndSetCookie,
+} = require("../utils/generateTokenAndSetCookie.js");
+const {
   sendVerificationEmail,
   sendWelcomeEmail,
   sendForgetPasswordEmail,
   sendPasswordResetSuccess,
-} from "../mailtrap/emails.js";
-import { userModel } from "../models/userModel.js";
-import { fail } from "assert";
+} = require("../mailtrap/emails.js");
+const { userModel } = require("../models/userModel.js");
 
-export const signup = async (req, res) => {
+const signup = async (req, res) => {
   const { email, password, name, role } = req.body;
   console.log(email, password, name, role);
   try {
@@ -98,7 +98,7 @@ export const signup = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
-export const sendVerificationCode = async (req, res) => {
+const sendVerificationCode = async (req, res) => {
   const { email } = req.body;
   console.log(email);
   try {
@@ -138,7 +138,7 @@ export const sendVerificationCode = async (req, res) => {
     });
   }
 };
-export const verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res) => {
   const { code } = req.body;
   console.log("this is the code ", code);
   try {
@@ -177,7 +177,7 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const [user] = await userModel.getUserLogin(email);
@@ -211,11 +211,11 @@ export const login = async (req, res) => {
     });
   }
 };
-export const logout = async (req, res) => {
+const logout = async (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
-export const forgetPassword = async (req, res) => {
+const forgetPassword = async (req, res) => {
   const { email } = req.body;
   try {
     const [user] = await userModel.getUserByEmail(email);
@@ -256,7 +256,7 @@ export const forgetPassword = async (req, res) => {
     });
   }
 };
-export const resetPassword = async (req, res) => {
+const resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword } = req.body;
     if (password != confirmPassword) {
@@ -293,4 +293,14 @@ export const resetPassword = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+module.exports = {
+  signup,
+  sendVerificationCode,
+  verifyEmail,
+  login,
+  logout,
+  forgetPassword,
+  resetPassword,
 };

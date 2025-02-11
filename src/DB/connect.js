@@ -1,5 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
+const { createClient } = require("@supabase/supabase-js");
+
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -12,4 +13,4 @@ if (!dbKEY || !dbKEY) {
 
 const supabase = createClient(dbURL, dbKEY);
 
-export default supabase;
+module.exports = { supabase };

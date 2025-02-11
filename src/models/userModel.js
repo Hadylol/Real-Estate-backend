@@ -1,6 +1,6 @@
-import supabase from "../DB/connect.js";
+const { supabase } = require("../DB/connect.js");
 
-export const userModel = {
+const userModel = {
   async getAllUsers() {
     const { data, error } = await supabase.from("users").select("*");
     if (error) throw new Error(`Failed to Fetch All users : ${error}`);
@@ -144,3 +144,5 @@ export const userModel = {
     return data;
   },
 };
+
+module.exports = { userModel };

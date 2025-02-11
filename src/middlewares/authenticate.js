@@ -1,4 +1,4 @@
-export const authenticate = (req, res, next) => {
+const authenticate = (req, res, next) => {
   const token = req.cookies.token;
   console.log("this is the token", token);
   if (!token) {
@@ -6,3 +6,4 @@ export const authenticate = (req, res, next) => {
   }
   next();
 };
+module.exports = { authenticate };

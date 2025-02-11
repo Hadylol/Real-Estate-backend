@@ -1,10 +1,10 @@
-import {
+const {
   VERIFICATION_EMAIL_TEMPLATE,
   PASSWORD_RESET_REQUEST_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
-} from "../mailtrap/emailTemplates.js";
-import { client, sender } from "../mailtrap/mailtrap.js";
-export const sendVerificationEmail = async (email, verificationToken) => {
+} = require("../mailtrap/emailTemplates.js");
+const { client, sender } = require("../mailtrap/mailtrap.js");
+const sendVerificationEmail = async (email, verificationToken) => {
   const recipient = [{ email }];
   console.log(recipient);
   try {
@@ -23,7 +23,7 @@ export const sendVerificationEmail = async (email, verificationToken) => {
     throw new Error(`Error sending verification  email ${error.message} `);
   }
 };
-export const sendWelcomeEmail = async (email, name) => {
+const sendWelcomeEmail = async (email, name) => {
   const recipient = [{ email }];
   try {
     const res = await client.send({
@@ -39,7 +39,7 @@ export const sendWelcomeEmail = async (email, name) => {
   }
 };
 
-export const sendForgetPasswordEmail = async (email, resetURL) => {
+const sendForgetPasswordEmail = async (email, resetURL) => {
   const recipient = [{ email }];
   try {
     const res = await client.send({
@@ -54,7 +54,7 @@ export const sendForgetPasswordEmail = async (email, resetURL) => {
     throw new Error(`Error sending rest password email ${error.message}`);
   }
 };
-export const sendPasswordResetSuccess = async (email) => {
+const sendPasswordResetSuccess = async (email) => {
   const recipient = [{ email }];
   try {
     const res = await client.send({
@@ -70,4 +70,10 @@ export const sendPasswordResetSuccess = async (email) => {
       `Faild to send password reset sucesss email ${error.message}`,
     );
   }
+};
+module.exports = {
+  sendPasswordResetSuccess,
+  sendForgetPasswordEmail,
+  sendWelcomeEmail,
+  sendVerificationEmail,
 };

@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
 dotenv.config();
-export const generateTokenAndSetCookie = (res, userID) => {
+const generateTokenAndSetCookie = (res, userID) => {
   const token = jwt.sign({ userID }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
@@ -14,3 +14,4 @@ export const generateTokenAndSetCookie = (res, userID) => {
   });
   return token;
 };
+module.exports = { generateTokenAndSetCookie };

@@ -1,6 +1,5 @@
-import { userModel } from "../models/userModel.js";
-
-export const validateToken = async (req, res, next) => {
+const { userModel } = require("../models/userModel.js");
+const validateToken = async (req, res, next) => {
   try {
     const { token } = req.params;
     if (!token) {
@@ -25,3 +24,4 @@ export const validateToken = async (req, res, next) => {
     });
   }
 };
+module.exports = { validateToken };
