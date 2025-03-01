@@ -275,7 +275,7 @@ const resetPassword = async (req, res) => {
     const user = req.user;
     console.log(user);
 
-    const saltRounds = parseInt(process.env.BCRY_SALT);
+    const saltRounds = 10
     const hashPassword = await bcrypt.hash(password, saltRounds);
 
     const [updatedUser] = await userModel.updateUserPassword(

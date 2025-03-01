@@ -4,8 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const TOKEN = process.env.MAILTRAP_TOKEN;
-const ENDPOINT = process.env.MAILTRAP_ENDPOINT;
-
+console.log(TOKEN)
 const client = new MailtrapClient({
   token: TOKEN,
 });
