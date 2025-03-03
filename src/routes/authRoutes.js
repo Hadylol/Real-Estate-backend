@@ -7,11 +7,9 @@ const {
   logout,
   forgetPassword,
   resetPassword,
-} = require("../controllers/auth_controller");
+} = require("../controllers/authController");
 const { authenticate } = require("../middlewares/authenticate");
 const { validateToken } = require("../middlewares/validateResetToken");
-
-console.log(authenticate, validateToken);
 
 const router = express.Router();
 

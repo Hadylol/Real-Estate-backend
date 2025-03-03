@@ -76,7 +76,7 @@ const signup = async (req, res) => {
       });
     }
     console.log(
-      `this is the user instered into db \n ${user.email}${user.name}${user.role}`,
+      `this is the user instered into db \n ${user.email}${user.name}${user.role}`
     );
     //generate jwt
     generateTokenAndSetCookie(res, user.user_id);
@@ -124,7 +124,7 @@ const sendVerificationCode = async (req, res) => {
       false,
       verificationToken,
       expiresAt,
-      user.user_id,
+      user.user_id
     );
 
     await sendVerificationEmail(updatedUser.email, verificationToken);
@@ -156,7 +156,7 @@ const verifyEmail = async (req, res) => {
       true,
       null,
       null,
-      user.user_id,
+      user.user_id
     );
     await sendWelcomeEmail(updatedUser.email, updatedUser.name);
     res.status(200).json({
@@ -238,12 +238,12 @@ const forgetPassword = async (req, res) => {
     const [updatedUser] = await userModel.updateUserForgetPassword(
       resetToken,
       resetTokenExpire,
-      user.user_id,
+      user.user_id
     );
     //sending reset email
     sendForgetPasswordEmail(
       updatedUser.email,
-      `http://${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`,
+      `http://${process.env.CLIENT_URL}/api/auth/reset-password/${resetToken}`
     );
     res.status(200).json({
       success: true,
@@ -275,12 +275,12 @@ const resetPassword = async (req, res) => {
     const user = req.user;
     console.log(user);
 
-    const saltRounds = 10
+    const saltRounds = 10;
     const hashPassword = await bcrypt.hash(password, saltRounds);
 
     const [updatedUser] = await userModel.updateUserPassword(
       hashPassword,
-      user.user_id,
+      user.user_id
     );
     await sendPasswordResetSuccess(updatedUser.email);
     res.status(200).json({

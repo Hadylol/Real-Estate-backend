@@ -4,7 +4,7 @@ const {
   getUser,
   getUsers,
   getVendors,
-} = require("../controllers/adminDashboard_controller");
+} = require("../controllers/adminDashboardController");
 
 const router = express.Router();
 
