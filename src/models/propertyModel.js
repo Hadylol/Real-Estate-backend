@@ -1,18 +1,21 @@
 const { supabase } = require("../DB/connect");
 
 const propertyModel = {
-  async getProperty(propertyName) {
+  async getProperty(propertyID, userID) {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .eq("name", propertyName)
-      .single();
+      .eq("id", propertyID);
     if (error)
       throw new Error(`Failed to fetch the Property by name "${error.message}`);
     return data;
   },
-  async getProperties() {
-    const { data, error } = await supabase.from("properties").select("*");
+  async getProperties(userID) {
+    console.log(`userID is  ${userID}`);
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("user_id", userID);
     if (error) throw Error(`Failed to fetch all the Proprties`);
     return data;
   },

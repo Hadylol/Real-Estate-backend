@@ -4,15 +4,15 @@ const {
   fetchProperty,
   createProperty,
 } = require("../controllers/vendorDashboardController.js");
-const authenticateVendor = require("../middlewares/authenticateVendor.js");
-const authenticate = require("../middlewares/authenticate.js");
+const { authenticateVendor } = require("../middlewares/authenticateVendor.js");
+const { authenticate } = require("../middlewares/authenticate.js");
 const router = express.Router();
 
-//router.use(authenticateVendor);
-//router.use(authenticate);
+router.use(authenticateVendor);
+router.use(authenticate);
 
 router.get("/properties", fetchProperties);
-router.get("/properties/:propertyName", fetchProperty);
+router.get("/properties/:propertyID", fetchProperty);
 
 //router.get("/get-all-projects", getProjects);
 //router.get("/get-property/:projectName", getProject);

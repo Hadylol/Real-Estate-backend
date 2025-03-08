@@ -80,7 +80,7 @@ const signup = async (req, res) => {
     );
     //generate jwt
     generateTokenAndSetCookie(res, user.user_id);
-    await sendVerificationEmail(user.email, verificationToken);
+    // await sendVerificationEmail(user.email, verificationToken);
     await res.status(201).json({
       success: true,
       message: "User created!",

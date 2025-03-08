@@ -2,12 +2,20 @@ const { propertyModel } = require("../models/propertyModel");
 
 const fetchProperties = async (req, res) => {
   try {
-    const [properties] = await propertyModel.getProperties();
-    return res.status(200).json({
+    userID = req.user.userID;
+    console.log(userID);
+    const [properties] = await propertyModel.getProperties(userID);
+    if (!properties) {
+      return res.status(404).json({
+        success: false,
+        message: "No properties Found",
+      });
+    }
+    res.status(200).json({
       success: true,
       propreties: { properties },
     });
-  } catch {
+  } catch (error) {
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -16,7 +24,35 @@ const fetchProperties = async (req, res) => {
 };
 const fetchProperty = async (req, res) => {
   try {
-  } catch {}
+    const { propertyID } = req.params;
+
+    if (!propertyID) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request..",
+      });
+    }
+    const user = req.user.userID;
+    console.log(propertyID, user);
+    const [property] = await propertyModel.getProperty(propertyID, user);
+    console.log(property);
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+    res.status(201).json({
+      success: true,
+      message: "this is the property ",
+      property: { property },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `something went wrong  ${error}`,
+    });
+  }
 };
 
 const createProperty = async (req, res) => {
@@ -47,10 +83,14 @@ const createProperty = async (req, res) => {
       missingFields,
     });
   }
+
+  //console.log(req.user);
   try {
+    user = req.user.userID;
     const [property] = await propertyModel.createProperty({
       name,
       description,
+      user_id: user,
       type,
       surface,
       price,
@@ -64,10 +104,12 @@ const createProperty = async (req, res) => {
         message: "Failed to create a New Property",
       });
     }
+    console.log(req.user.userID);
     return res.status(201).json({
       success: true,
       message: "Property Created!",
       property: {
+        user: property.user,
         name: property.name,
         type: property.type,
         price: property.price,
@@ -78,10 +120,10 @@ const createProperty = async (req, res) => {
         description: property.description,
       },
     });
-  } catch {
+  } catch (error) {
     res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };

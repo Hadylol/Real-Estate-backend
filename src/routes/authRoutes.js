@@ -12,7 +12,6 @@ const { authenticate } = require("../middlewares/authenticate");
 const { validateToken } = require("../middlewares/validateResetToken");
 
 const router = express.Router();
-
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
