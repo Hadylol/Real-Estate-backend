@@ -79,7 +79,7 @@ const signup = async (req, res) => {
       `this is the user instered into db \n ${user.email}${user.name}${user.role}`
     );
     //generate jwt
-    generateTokenAndSetCookie(res, user.user_id);
+    generateTokenAndSetCookie(res, user);
     // await sendVerificationEmail(user.email, verificationToken);
     await res.status(201).json({
       success: true,
@@ -193,7 +193,7 @@ const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
     }
-    generateTokenAndSetCookie(res, user.user_id);
+    generateTokenAndSetCookie(res, user);
     res.status(200).json({
       success: true,
       message: "Logged in successfully",

@@ -68,7 +68,7 @@ const userModel = {
       .single();
     if (!data) {
       throw new Error(
-        `Invalid or expired Verification code, Please Try agian..`,
+        `Invalid or expired Verification code, Please Try agian..`
       );
     }
     console.log("this is from get user by token", data);
@@ -80,7 +80,7 @@ const userModel = {
     is_verified,
     verificationToken,
     verificationTokenExpiry,
-    userID,
+    userID
   ) {
     const { data, error } = await supabase
       .from("users")
@@ -91,6 +91,7 @@ const userModel = {
       })
       .eq("user_id", userID)
       .select(`user_id, email,name,role,is_verified`);
+    //handle ths in the controller
     if (!data) {
       throw new Error(`No user Found `);
     }
@@ -102,7 +103,7 @@ const userModel = {
   async updateUserForgetPassword(
     resetPasswordToken,
     resetPasswordExpire,
-    userID,
+    userID
   ) {
     const { data, error } = await supabase
       .from("users")

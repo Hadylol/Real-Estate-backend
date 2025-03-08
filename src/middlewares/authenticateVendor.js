@@ -1,11 +1,11 @@
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-
-dotenv.config();
-
 const authenticateVendor = (req, res, next) => {
-  const role = req.params;
-  if (role != promoteur) {
+  console.log(req.user.role);
+  const role = req.user.role;
+  if (!role || role != "vendor") {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized role",
+    });
   }
   next();
 };

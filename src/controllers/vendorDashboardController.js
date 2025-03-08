@@ -83,6 +83,7 @@ const createProperty = async (req, res) => {
       missingFields,
     });
   }
+  //validate some fields
 
   //console.log(req.user);
   try {
@@ -109,6 +110,7 @@ const createProperty = async (req, res) => {
       success: true,
       message: "Property Created!",
       property: {
+        id: property.id,
         user: property.user,
         name: property.name,
         type: property.type,
@@ -127,5 +129,90 @@ const createProperty = async (req, res) => {
     });
   }
 };
-
-module.exports = { fetchProperties, fetchProperty, createProperty };
+const updateProperty = async (req, res) => {
+  const { propertyID } = req.params;
+  const userID = req.user.userID;
+  const {
+    name,
+    type,
+    price,
+    surface,
+    address,
+    city,
+    municipality,
+    description,
+  } = req.body;
+  const fieldsMap = {
+    name: name,
+    type: type,
+    price: price,
+    surface: surface,
+    address: address,
+    city: city,
+    municipality: municipality,
+    description: description,
+  };
+  const arrFields = Object.entries(fieldsMap);
+  const fitleredArrFields = arrFields.filter(
+    ([key, value]) => typeof value != "undefined"
+  );
+  const fitleredFields = Object.fromEntries(fitleredArrFields);
+  try {
+    const updatedProperty = await propertyModel.updateProperty(
+      propertyID,
+      userID,
+      fitleredFields
+    );
+    if (updatedProperty.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Not found or None to update",
+      });
+    }
+    console.log(updatedProperty);
+    res.status(200).json({
+      success: true,
+      message: `Property updated successfully`,
+      updatedProperty,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went wrong ${error}`,
+    });
+  }
+};
+const deleteProperty = async (req, res) => {
+  const { propertyID } = req.params;
+  const userID = req.user.userID;
+  try {
+    const deletedProperty = await propertyModel.deleteProperty(
+      propertyID,
+      userID
+    );
+    if (deletedProperty.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found!",
+      });
+    }
+    console.log(deletedProperty);
+    res.status(200).json({
+      success: true,
+      message: "Proeperty deleted successfully",
+      deletedProperty,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went wrong..${error}`,
+    });
+  }
+};
+module.exports = {
+  fetchProperties,
+  fetchProperty,
+  createProperty,
+  updateProperty,
+  deleteProperty,
+};
