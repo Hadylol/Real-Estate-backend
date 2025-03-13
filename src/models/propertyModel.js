@@ -8,7 +8,7 @@ const propertyModel = {
       .eq("id", propertyID)
       .eq("user_id", userID);
     if (error)
-      throw new Error(`Failed to fetch the Property by name "${error.message}`);
+      throw new Error(`Failed to fetch the Property  ${error.message}`);
     return data;
   },
   async getProperties(userID) {

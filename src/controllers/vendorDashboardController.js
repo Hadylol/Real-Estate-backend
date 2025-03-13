@@ -1,3 +1,4 @@
+const projectModel = require("../models/projectModel");
 const { propertyModel } = require("../models/propertyModel");
 
 const fetchProperties = async (req, res) => {
@@ -209,10 +210,122 @@ const deleteProperty = async (req, res) => {
     });
   }
 };
+const fetchProjects = async (req, res) => {
+  try {
+    const userID = req.user.userID;
+    const [projects] = await projectModel.getProjects(userID);
+    console.log(projects);
+    if (!projects) {
+      return res.status(404).json({
+        success: false,
+        message: "No Projects Found..",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Fetched Projects successfully`,
+      projects: projects,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went wrng ${error.message}`,
+    });
+  }
+};
+const fetchProject = async (req, res) => {
+  const { projectID } = req.params;
+  console.log(projectID);
+  if (!projectID) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request..",
+    });
+  }
+  try {
+    const userId = req.user.userID;
+    console.log(req.user.userID);
+    console.log(userId);
+    const project = await projectModel.getProject(projectID, userId);
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not Found",
+      });
+    }
+    console.log(project);
+    res.status(200).json({
+      success: true,
+      message: "Project fetched successfully",
+      project,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went wrong ${error.message}`,
+    });
+  }
+};
+const createProject = async (req, res) => {
+  const {
+    project_name,
+    project_type,
+    total_surface,
+    construction_status,
+    delivery_date,
+    description,
+    properties,
+  } = req.body;
+
+  try {
+    const userId = req.user.userID;
+
+    const project = {
+      project_name,
+      project_type,
+      total_surface,
+      description,
+      construction_status,
+      //delivery_date,
+      user_id: userId,
+    };
+    const projectPropreties = properties.map((prop) => ({
+      ...prop,
+      user_id: userId,
+    }));
+    //console.log(project);
+    // console.log("----------------");
+    //console.log(projectPropreties);
+
+    const projectDB = await projectModel.createProject(
+      project,
+      projectPropreties
+    );
+    res.status(201).json({
+      success: true,
+      message: "Project Created successfully",
+      project: projectDB.project,
+      projectProperties: projectDB.properties,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+const updateProject = async (req, res) => {};
+const deleteProject = async (req, res) => {};
 module.exports = {
   fetchProperties,
   fetchProperty,
   createProperty,
   updateProperty,
   deleteProperty,
+  createProject,
+  fetchProject,
+  fetchProjects,
+  updateProject,
+  deleteProject,
 };
