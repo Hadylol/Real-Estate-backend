@@ -73,6 +73,32 @@ const projectModel = {
       );
     return propertyData;
   },
+  async updateProject(projectId, userId, fields) {
+    console.log(fields);
+    console.log();
+    if (Object.keys(fields).length === 0) {
+      throw new Error("No valid fields Provided for update");
+    }
+    const { data, error } = await supabase
+      .from("project")
+      .update(fields)
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .select();
+    if (error) throw new Error(`Failed to update project ${error.message}`);
+    return data;
+  },
+  async deleteProject(projectId, userId) {
+    console.log(projectId, userId);
+    const { data, error } = await supabase
+      .from("project")
+      .delete()
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .select();
+    if (error) throw new Error(`Failed to Delete Project ${error.message}`);
+    return data;
+  },
 };
 
 module.exports = projectModel;

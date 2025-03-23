@@ -38,7 +38,7 @@ const propertyModel = {
       .eq("id", propertyID)
       .eq("user_id", userID)
       .select();
-    if (error) throw new Error(`Failed to update proeprty ${error}`);
+    if (error) throw new Error(`Failed to update proeprty ${error.message}`);
     return data;
   },
   async deleteProperty(propertyID, userID) {
@@ -49,7 +49,7 @@ const propertyModel = {
       .eq("id", propertyID)
       .eq("user_id", userID)
       .select();
-    if (error) throw new Error(`Failed to Delete property ${error}`);
+    if (error) throw new Error(`Failed to Delete property ${error.message}`);
     return data;
   },
 };

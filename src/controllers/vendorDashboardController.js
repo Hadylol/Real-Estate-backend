@@ -206,7 +206,7 @@ const deleteProperty = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: `Something went wrong..${error}`,
+      message: `Something went wrong..${error.message}`,
     });
   }
 };
@@ -315,8 +315,86 @@ const createProject = async (req, res) => {
     });
   }
 };
-const updateProject = async (req, res) => {};
-const deleteProject = async (req, res) => {};
+const updateProject = async (req, res) => {
+  const { projectID } = req.params;
+  //console.log(req.params);
+  const userId = req.user.userID;
+  const {
+    project_name,
+    project_type,
+    total_surface,
+    description,
+    construction_status,
+    delivery_date,
+  } = req.body;
+  const fieldsMap = {
+    project_name: project_name,
+    project_type: project_type,
+    total_surface: total_surface,
+    description: description,
+    construction_status: construction_status,
+    delivery_date: delivery_date,
+  };
+  const arrFields = Object.entries(fieldsMap);
+  const fitleredArrFields = arrFields.filter(
+    ([_, value]) => typeof value != "undefined"
+  );
+  const fitleredFields = Object.fromEntries(fitleredArrFields);
+  if (Object.keys(fitleredFields).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No valid fields provided for update",
+    });
+  }
+  console.log({ fitleredFields });
+  try {
+    const updatedProject = await projectModel.updateProject(
+      projectID,
+      userId,
+      fitleredFields
+    );
+    if (!updatedProject || updatedProject.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Not Found or None to Update",
+      });
+    }
+    console.log(updateProject);
+    res.status(201).json({
+      success: true,
+      message: "Project Updated succesfully",
+      updatedProject,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went Wrong  ${error.message} `,
+    });
+  }
+};
+const deleteProject = async (req, res) => {
+  const { projectID } = req.params;
+  const userId = req.user.userID;
+  try {
+    const deletedProject = await projectModel.deleteProject(projectID, userId);
+    if (!deletedProject || deletedProject.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not Found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Project Deleted Successfully",
+      deletedProject,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Something went Wrong ${error.message}`,
+    });
+  }
+};
 module.exports = {
   fetchProperties,
   fetchProperty,
