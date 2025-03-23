@@ -7,7 +7,7 @@ dotenv.config();
 const dbKEY = process.env.DB_KEY;
 const dbURL = process.env.DB_URL;
 
-if (!dbKEY || !dbKEY) {
+if (!dbKEY || !dbURL) {
   throw new Error("Missing Data Base Key or URL");
 }
 
